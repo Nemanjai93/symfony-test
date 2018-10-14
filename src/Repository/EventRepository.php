@@ -17,15 +17,23 @@ class EventRepository extends ServiceEntityRepository {
         parent::__construct($registry, Event::class);
     }
 
+    /**
+     * Since it is unknown how we determine top 5 countries,
+     * they are set statically inside query, so in order for
+     * our app tor return any result there need to be at least
+     * one of bellow countries inside database
+     *
+     * @return mixed
+     */
     public function lastSevenDaysEvents() {
         $date = new \DateTime('now');
         $date->modify('- 7 days');
-        $country = ['US'];
+        $country = ['US','UK', 'CA', 'JP', 'FR'];
 
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.date >= :date')
             ->setParameter('date', $date)
-            ->andWhere('e.country IN :country')
+            ->andWhere('e.country IN (:country)')
             ->setParameter('country', $country)
             ->getQuery();
 

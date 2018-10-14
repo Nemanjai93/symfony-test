@@ -11,6 +11,8 @@
         "symfony/flex": "^1.1",
         "symfony/framework-bundle": "*",
         "symfony/orm-pack": "^1.0",
+        "symfony/property-access": "*",
+        "symfony/serializer": "*",
         "symfony/twig-bundle": "*",
         "symfony/yaml": "*"
     },

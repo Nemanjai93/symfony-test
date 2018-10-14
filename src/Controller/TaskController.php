@@ -8,7 +8,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\CsvEncoder;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class TaskController extends Controller {
 
@@ -45,19 +50,38 @@ class TaskController extends Controller {
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function getEvents(Request $request) {
+
+        $encoders = array(new CsvEncoder(), new JsonEncoder());
+        $normalizer = new ObjectNormalizer();
+
+        $normalizer->setIgnoredAttributes(['date', 'id']);
+        $serializer = new Serializer([$normalizer], $encoders);
+
         $events = $this->entityManager->getRepository(Event::class)
             ->lastSevenDaysEvents();
+        $return_data = [];
+        foreach ($events as $event) {
+            $temp = $event;
+            foreach ($events as $ev) {
+                if ($event != $ev) {
+                    if ($event->getCountry() == $ev->getCountry() && $event->getEvent() == $ev->getEvent()) {
+                        $temp->setCount($temp->getCount() + $ev->getCount());
+                    }
+                }
+            }
+            foreach ($return_data as $repeat) {
+                if ($repeat->getCountry() == $temp->getCountry() && $repeat->getEvent() == $temp->getEvent()) {
+                    continue 2;
+                }
+            }
+            $return_data[] = $temp;
+        }
 
         $format = $request->getRequestFormat();
 
-        //@todo: Format output to csv and json
-        if ($format == 'csv') {
-            $data = json_encode($events);
-        }
+        $data = $serializer->serialize($return_data, $format);
 
-        return $this->render('events.' . $format . '.twig', [
-            'events' => $events
-        ]);
+        return new Response($data);
 
     }
 
