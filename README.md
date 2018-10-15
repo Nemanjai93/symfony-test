@@ -30,6 +30,7 @@ It is necessary to have RabbitMQ installed localy.
 <p>Assuming that you have already installed RabbitMQ, it is necessary to create a virtual host and assign its permissions by issuing the following commands:</p>
 <p><code>rabbitmqctl add_vhost symfony-test</code></p>
 <p><code>rabbitmqctl set_permissions -p symfony-test guest ".*" ".*" ".*"</code></p>
+<p>As an administrator, start and stop the server as usual for Debian-based systems: <code>service rabbitmq-server start</code></p>
 <p>Next step is to run the following console command so that AMQPLIB can create the “data” exchange on RabbitMQ.</p>
 <code>php bin/console rabbitmq:setup-fabric</code>
 <p>In order to proccess the queue, run the command:</p>
